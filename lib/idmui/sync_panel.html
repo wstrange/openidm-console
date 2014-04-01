@@ -1,0 +1,36 @@
+
+
+<h1>Sync Targets</h1>
+
+
+
+<div class="well">
+<button type="button" class="btn" ng-click="ctrl.getSyncConfig()">
+  <span class="glyphicon glyphicon-refresh"></span> Refresh
+</button>
+
+
+  <hr>
+  <table class="table table-striped">
+   <colgroup>
+       <col span="1" style="width: 10%;">
+       <col span="1" style="width: 40%;">
+       <col span="1" style="width: 25%;">
+       <col span="1" style="width: 25%;">
+    </colgroup>
+
+    <tr><th>Select</th><th>Mapping</th><th>source</th><th>target</th>
+    </tr>
+     <tr ng-repeat="m in ctrl.syncList">
+      <td><input type="checkbox" ng-model="m.selected"/></td>
+      <td>{{m.name}}</td>
+      <td>{{m.source}}</td>
+       <td>{{m.target}}</td>
+     </tr>
+  </table>
+  <br>
+  <button  class="btn" ng-click="ctrl.syncSelected()">Sync Selected</button>
+</div>
+
+<p>Status: {{ctrl.status}}</p>
+

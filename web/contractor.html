@@ -1,0 +1,10 @@
+<oi-form context="c.wfcontext">
+  <oi-textfield label="userName" key="userName" ng-required="true"></oi-textfield>
+  <oi-textfield label="First Name" key="givenName"></oi-textfield>
+  <oi-textfield label="Last Name" key="familyName"></oi-textfield>
+  <oi-textfield label="Password" key="password"></oi-textfield>
+  <oi-email label="email" key="email" ng-required="true"></oi-email>
+  <oi-textfield label="description" key="description"></oi-textfield>
+  <oi-text label="test" key="test" ng-model="c.models"  minlength="4"></oi-text>
+  <oi-select label="Select Manager"  key="manager" namedQuery="getManager"></oi-select>
+</oi-form>

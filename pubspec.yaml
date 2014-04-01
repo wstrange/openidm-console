@@ -1,0 +1,16 @@
+name: frangular
+description: A sample web application
+dependencies:
+  angular:
+    git: git://github.com/angular/angular.dart.git
+  angular_ui:
+    git: https://github.com/akserg/angular.dart.ui
+  browser: any
+  js: any
+  lawndart: any
+  logging: any
+dependency_overrides:
+  angular:
+    git: git://github.com/angular/angular.dart.git
+  angular_ui:
+    git: https://github.com/akserg/angular.dart.ui

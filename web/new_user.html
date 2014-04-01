@@ -1,0 +1,48 @@
+
+<div class="well col-md-4">
+<form name="newuser" class="form" role="form" novalidate>
+  <div class="form-group has-success has-feedback ">
+   <label>Username / Id</label>
+   <input type="text" name="username" ng-required="true" ng-model="ctrl.userName" class="form-control" placeholder="name" minlength="4">
+<!--
+   <div ng-if="newuser['username'].invalid && ! newuser['username'].pristine" class="help-block">
+      Username is required. Minimum 4 characters
+    </div>
+ -->
+    <!--
+    <div ng-if="newuser['username'].errors['minlength'] != null" >
+    Must be at least 6 characters
+    </div>
+    -->
+  </div>
+   <div class="form-group">
+      <label for="password">Password</label>
+      <input type="password" name="password" ng-required="true" ng-model="ctrl.password" class="form-control">
+  </div>
+  <!--
+   <div class="form-group"  ng-class="{ 'has-error': newuser.email.invalid}">
+   -->
+    <div class="form-group">
+      <label>Email</label>
+      <input type="email" name="email" ng-required="true" ng-model="ctrl.email" class="form-control" placeholder="email@test.com">
+     <!--
+      <p ng-if="newuser.email.invalid" class="help-block">Email is required.</p>
+      -->
+    </div>
+
+    <div class="form-group">
+      <label>Userrole</label>
+      <input type="text" name="userrole" ng-required="true" ng-model="ctrl.userrole" class="form-control">
+    </div>
+
+<!--
+   <p> Form is {{newuser}} email errors=  {{newuser.hasError('email')}} controls {{newuser.controls}}  email {{newuser['email']}}</p>
+  -->
+  <button type="submit" ng-disabled="newuser.invalid" class="btn btn-default"  ng-click="ctrl.submit()">Submit</button>
+  <button class="btn" ng-click="ctrl.reset()">Reset Form</button>
+
+  <br>
+  <p>Status:  {{ctrl.statusMsg}}</p>
+</form>
+
+</div>
