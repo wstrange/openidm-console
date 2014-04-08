@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+
+<div class="well">
+<button type="button" class="btn" ng-click="ctrl.getConfig()">
+  <span class="glyphicon glyphicon-refresh"></span> Refresh
+</button>
+
+<p>Connectors<p>
+<ul>
+<li ng-repeat="p in ctrl.config.connectorList">{{p}}</li>
+</ul>
+
+<div>
+
+<hr/>
+
+<select ng-model="ctrl.selectedConnector" >
+<option ng-repeat="item in ctrl.config.connectorList">{{item}}</option>
+</select>
+</div>
+<hr/>
+<p>Selected Connector: {{ctrl.selectedConnector}}</p>
+<!--
+<p>Endpoints</p>
+<ul>
+<li ng-repeat="p in ctrl.config.endpointList">{{p}}</li>
+</ul>
+-->
+
+</div>

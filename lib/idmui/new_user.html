@@ -35,6 +35,21 @@
       <input type="text" name="userrole" ng-required="true" ng-model="ctrl.userrole" class="form-control">
     </div>
 
+    <div class="form-group">
+      <input type="checkbox" ng-model="ctrl.bulkCreate">Bulk Create
+      <small>(replace %i in form expresions with count)</small></input>
+    </div>
+
+     <div class="form-group">
+       <label>Start index</label>
+        <input type="number" ng-model="ctrl.startIndex" min="0" max="100000" class="form-control" ng-disabled="! ctrl.bulkCreate"></input>
+
+      <label>Count</label>
+      <input type="number" ng-model="ctrl.count" min="0" max="100000" class="form-control" ng-disabled="! ctrl.bulkCreate"></input>
+    </div>
+    <br>
+
+
 <!--
    <p> Form is {{newuser}} email errors=  {{newuser.hasError('email')}} controls {{newuser.controls}}  email {{newuser['email']}}</p>
   -->
@@ -42,7 +57,10 @@
   <button class="btn" ng-click="ctrl.reset()">Reset Form</button>
 
   <br>
-  <p>Status:  {{ctrl.statusMsg}}</p>
-</form>
 
+</form>
 </div>
+<div class="row">
+<p>{{ctrl.statusMsg}}</p>
+</div>
+

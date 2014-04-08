@@ -9,6 +9,7 @@ dependencies:
   js: any
   lawndart: any
   logging: any
+  quiver: any
 dependency_overrides:
   angular:
     git: git://github.com/angular/angular.dart.git

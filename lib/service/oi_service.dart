@@ -7,7 +7,8 @@ import 'package:logging/logging.dart';
 import 'package:lawndart/lawndart.dart';
 
 part 'wf_context.dart';
-
+part 'oi_service_config.dart';
+part 'oi_config.dart';
 
 class OIServiceModule extends Module {
   OIServiceModule() {
@@ -18,53 +19,6 @@ class OIServiceModule extends Module {
 }
 
 var log = new Logger("OIService");
-
-
-// Holds Service credentials and endpoint for communicating to openidm
-class OIServiceConfig {
-  String  username = "openidm-admin";
-  String  password = "openidm-admin";
-  //String  url = "http://localhost:8080/openidm";
-  String  url = "http://openam.example.com/openidm";
-  var _db = new Store('openidm','authconfig');
-
-  OIServiceConfig.withConfig(this.url,this.username,this.password) {
-    saveConfig();
-  }
-
-  OIServiceConfig() {
-   // _db.getByKey("url").then( (v) => print(v));
-   log.finest("Loading config from storage");
-   _db.open()
-    .then((_) => _db.exists("config"))
-    .then( (x)  {
-      if(x) {
-        _db.getByKey("config").then( (v) => _setConfig(v));
-      }
-      else
-        log.finest("No saved config found");
-   });
-
-   _db.open()
-    .then( (_) => _db.all().listen( (v) => log.finest("val = $v")));
-  }
-
-  _configMap() => { "username" : username, "password": password, "url": url };
-  _setConfig(String json) {
-    var m = JSON.decode(json) as Map;
-    username = m['username'];
-    password = m['password'];
-    url = m['url'];
-
-  }
-
-  saveConfig() {
-    var j = JSON.encode(_configMap());
-    log.finest("saving openidm config = $j");
-    _db.open()
-      .then( (_) => _db.save(j,"config"));
-  }
-}
 
 class OIService {
 
@@ -100,6 +54,18 @@ class OIService {
     return _http.get('$_url$resource',headers: adminHeaders);
   }
 
+  // perform a GET - resturn the JSON response
+  // todo: Is this really usefull? doesnt handle any errors...
+  Future _getJSON(resource) => _get(resource).then( (r) => r.responseText);
+
+  Future<HttpResponse> _post(resource, [var data = ""]) =>
+    _http.post("$_url$resource", data, headers: adminHeaders );
+
+  Future<Map> _postReturnJSON(resource, [var data = ""]) =>
+    _post(resource,data).then( (r)  => r.responseText);
+
+
+
   // Ping the OpenIDM service to see if it is alive. Return Future<true> if it is OK
   // Note that username/password are ignored. Anyone can ping openidm
   // This just tests if OpenIDM is up and responding
@@ -109,12 +75,15 @@ class OIService {
     });
   }
 
+  // Get the openidm configuration
+  Future<OIConfig> getConfig() => _getJSON("/config").then( (m) => new OIConfig(m));
+
   // Check the status of the openidm server as well our credentials
   // Note: We dont use ping here because it does not test the credentials.
   // We test by doing a GET on the sync config
   // todo: We should find a less expensive call
   Future<HttpResponse> credentialCheck() {
-      return _get("/config/sync").then( (resp) {
+      return _get("/config").then( (resp) {
         return resp;
       }, onError: (e) {
         log.severe("Health Check Failed. Cause ${e.status}");
@@ -283,14 +252,50 @@ class OIService {
     });
   }
 
-
   // Invoke recon on the given mapping
-  Future syncStart(String mapping) {
+  Future<HttpResponse> syncStart(String mapping) {
     return _http.post("$_url/recon?_action=recon&mapping=$mapping", "", headers: adminHeaders ).then( (r) {
       log.finest("Recon result $r");
       return r;
     });
   }
+
+  // Get recon info.
+  // See http://openidm.forgerock.org/doc/integrators-guide/index/chap-synchronization.html#recon-over-rest
+  // If [id] is provided this will fetch info for just that id. Otherwise -all recons will be fetched.
+  // The recon [id] is returned when OpenIDM starts the sync process
+  // Sample return values:
+  // {reconciliations: [{_id: 76d744b0-f55b-4068-b786-992c1e691b6c, mapping: managedUser_systemLDAP, ....
+  /* The progress attribute available for in-process recons:
+   *
+   *  "progress":{
+  "source":{             // Progress on set of existing entries in the mapping source
+    "existing":{
+      "processed":1001,
+        "total":"1001"   // Total number of entries in source set, if known, “?” otherwise
+    }
+  },
+  "target":{             // Progress on set of existing entries in the mapping target
+    "existing":{
+      "processed":1001,
+      "total":"1001"     // Total number of entries in target set, if known, “?” otherwise
+    },
+    "created":0          // New entries that were created
+  },
+  "links":{              // Progress on set of existing links between source and target
+    "existing":{
+      "processed":1001,
+      "total":"1001"     // Total number of existing links, if known, “?” otherwise
+    },
+  "created":0            // Denotes new links that were created
+  }
+
+   */
+  Future<Map> getSyncInfo([String id = null]) =>
+      ( id == null? _getJSON("/recon") : _getJSON("/recon/$id") );
+
+  // Cancel an in progress recon operation
+  Future<Map> cancelRecon(String id) => _postReturnJSON("/recon/$id&_action=cancel");
 }
 
 

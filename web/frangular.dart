@@ -11,7 +11,7 @@ import 'package:angular_ui/angular_ui.dart';
 
 import 'contractor.dart';
 
-import 'new_user.dart';
+import '../lib/idmui/new_user.dart';
 
 import 'package:logging/logging.dart';
 

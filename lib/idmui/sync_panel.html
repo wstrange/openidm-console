@@ -1,19 +1,20 @@
 
 
-<h1>Sync Targets</h1>
-
 
 
 <div class="well">
-<button type="button" class="btn" ng-click="ctrl.getSyncConfig()">
-  <span class="glyphicon glyphicon-refresh"></span> Refresh
-</button>
-
-
+ <div class="row">
+   <div class="col-md-4"><strong>Mapping </strong></div>
+    <div class="col-md-2 col-md-offset-6">
+        <button type="button" class="btn btn-sm btn-success" ng-click="ctrl.getSyncConfig()">
+        <span class="glyphicon glyphicon-refresh"></span> Refresh
+      </button>
+    </div>
+  </div>
   <hr>
   <table class="table table-striped">
    <colgroup>
-       <col span="1" style="width: 10%;">
+       <col span="1" style="width: 5%;">
        <col span="1" style="width: 40%;">
        <col span="1" style="width: 25%;">
        <col span="1" style="width: 25%;">
@@ -29,7 +30,64 @@
      </tr>
   </table>
   <br>
-  <button  class="btn" ng-click="ctrl.syncSelected()">Sync Selected</button>
+  <button  class="btn btn-sm btn-primary" ng-click="ctrl.syncSelected()">Sync Selected</button>
+</div>
+
+<div class="well">
+  <div class="row">
+   <div class="col-md-4"><strong>Syncronization Status</strong></div>
+    <div class="col-md-2 col-md-offset-6">
+        <button type="button" class="btn btn-sm btn-success" ng-click="ctrl.updateSyncStatus()">
+        <span class="glyphicon glyphicon-refresh"></span> Refresh
+      </button>
+    </div>
+  </div>
+  <hr>
+
+  <table class="table table-striped">
+     <colgroup>
+       <col span="1" style="width: 8%;">
+       <col span="1" style="width: 15%;">
+       <col span="1" style="width: 10%;">
+       <col span="1" style="width: 15%;">
+       <col span="1" style="width: 15%;">
+       <col span="1" style="width: 10%;">
+    </colgroup>
+    <tr>
+        <th>id</th><th>Mapping</th><th>state</th><th>started</th><th>ended</th><th> </th>
+    </tr>
+     <tr ng-repeat="m in ctrl.reconInfo">
+     <!--
+      <td><input type="checkbox" ng-model="m.selected"/></td>
+   <   -->
+<div>
+
+</div>
+      <td>
+        <div title="{{ctrl.getTooltip(m._id)}}">
+          <i>
+            {{m._id.substring(0,8)}}...
+          </i>
+        </div>
+      </td>
+      <td>{{m.mapping}}</td>
+      <td>{{m.state}}</td>
+      <td>{{m.started}}</td>
+       <td>
+          <div ng-if="m.state == 'ACTIVE'">
+            <progressbar animate="false" value="ctrl.syncCompletedPercent(m.progress)" type="success"><b>{{ctrl.syncCompletedPercent(m.progress)}}%</b></progressbar>
+          </div>
+          <div ng-if="m.state != 'ACTIVE'">
+            {{m.ended}}
+          </div>
+       </td>
+      <td>
+        <div ng-if="m.state == 'ACTIVE'">
+          <button class="btn btn-sm" ng-click="ctrl.cancelSync(m._id)">Cancel</button>
+        </div>
+      </td>
+     </tr>
+  </table>
 </div>
 
 <p>Status: {{ctrl.status}}</p>

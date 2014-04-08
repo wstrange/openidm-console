@@ -3,77 +3,42 @@
 <html ng-app>
   <head>
     <meta charset="utf-8">
-    <title>Frangular</title>
+    <title>OpenIDM</title>
     <link rel="stylesheet" href="css/bootstrap.css"/>
      <link rel="stylesheet" href="css/bootstrap-glyphicons.css"/>
   </head>
   <body>
-   <div class="container">
-    <div frangular>
-      <div class="row">
-        <div class="col-md-10"></div>
-        <div class="col-md-2">
-           <div modal-settings-ctrl>
-            <a href="#/" ng-click="ctrl.open('packages/frangular/idmui/oi_settings.html')">Settings</a>
+   <div openidm-controller class="container">
+     <div ng-if="! ctrl.isAuthenticated">
+        <h1>Login</h1>
+        <oi-login isAuthenticated="ctrl.isAuthenticated"></oi-login>
+     </div>
+      <div ng-if="ctrl.isAuthenticated">
+        <div class="row">
+          <div class="col-md-10"></div>
+          <div class="col-md-2">
+              <a href="#/" ng-click="ctrl.logout()">Logout</a>
           </div>
         </div>
+        <div class="row">
+          <tabset>
+            <tab heading="Users" disable="false">
+              <oi-users></oi-users>
+            </tab>
+             <tab heading="New User Form">
+                <new-user></new-user>
+            </tab>
+            <tab heading="Sync">
+              <sync-panel></sync-panel>
+            </tab>
+             <tab heading="Config">
+              <oi-config-panel></oi-config-panel>
+            </tab>
+          </tabset>
+        </div>
       </div>
-    <div class="row">
-    <tabset>
-    <!--
-      <tab heading="server">
-        <server url="ctrl.url"></server>
-      </tab>
-      -->
-     <!--
-       <tab heading="Workflows">
-          <br>
-
-          <button type="submit" class="btn btn-default" ng-click="ctrl.listWorkflows()">Refresh Workflows</button>
-          <button type="submit" class="btn btn-default" ng-click="ctrl.launchWorkflow()">Create Workflow</button>
-          <button type="submit" class="btn btn-default" ng-click="ctrl.launchContractor()">Launch Contractor</button>
-          <p> Available Workflows</p>
-
-          <ul>
-            <li ng-repeat="wf in ctrl.workflows" >
-                {{wf}}
-            </li>
-          </ul>
-          <p> status {{ctrl.statusMsg}} </p>
-          <p>Running Workflows</p>
-
-           <ul>
-            <li ng-repeat="wf in ctrl.runningWorkflows" >
-                <wf-instance processId="wf._id"></wf-instance>
-            </li>
-          </ul>
-      </tab>
-      -->
-
-      <tab heading="Users">
-        <oi-users></oi-users>
-      </tab>
-
-       <tab heading="New User Form">
-        <new-user></new-user>
-      </tab>
-
-      <tab heading="Sync">
-        <sync-panel></sync-panel>
-      </tab>
-
-<!--
-      <tab heading="Contractor Workflow">
-        <p>Please fill out all user details</p>
-        <contractor context="ctrl.context"></contractor>
-       </tab>
--->
-
-      </tabset>
     </div>
-   </div>
-   </div>
-    <script type="application/dart" src="frangular.dart"></script>
+    <script type="application/dart" src="openidm_console.dart"></script>
     <script type="text/javascript"  src="packages/browser/dart.js"></script>
   </body>
 </html>
