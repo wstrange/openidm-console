@@ -17,6 +17,11 @@
 <select ng-model="ctrl.selectedConnector" >
 <option ng-repeat="item in ctrl.config.connectorList">{{item}}</option>
 </select>
+
+<button type="button" class="btn" ng-click="ctrl.getSystemIds()">Get System ids</button>
+<label>ObjectId</label><input type="text" ng-model="ctrl.objectId">
+<button type="button" class="btn" ng-click="ctrl.getSystemObject()">Get System ids</button>
+
 </div>
 <hr/>
 <p>Selected Connector: {{ctrl.selectedConnector}}</p>

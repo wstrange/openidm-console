@@ -43,7 +43,7 @@ class OIService {
   }
 
 
-  OIService(this._http,this._serviceConfig) {
+  OIService(this._http, this._serviceConfig) {
     _setHeaders();
   }
 
@@ -51,18 +51,16 @@ class OIService {
   // todo: Can we do more error handling here?
   Future<HttpResponse> _get(resource) {
     //log.finest("_get $adminHeaders" );
-    return _http.get('$_url$resource',headers: adminHeaders);
+    return _http.get('$_url$resource', headers: adminHeaders);
   }
 
   // perform a GET - resturn the JSON response
   // todo: Is this really usefull? doesnt handle any errors...
-  Future _getJSON(resource) => _get(resource).then( (r) => r.responseText);
+  Future _getJSON(resource) => _get(resource).then((r) => r.responseText);
 
-  Future<HttpResponse> _post(resource, [var data = ""]) =>
-    _http.post("$_url$resource", data, headers: adminHeaders );
+  Future<HttpResponse> _post(resource, [var data = ""]) => _http.post("$_url$resource", data, headers: adminHeaders);
 
-  Future<Map> _postReturnJSON(resource, [var data = ""]) =>
-    _post(resource,data).then( (r)  => r.responseText);
+  Future<Map> _postReturnJSON(resource, [var data = ""]) => _post(resource, data).then((r) => r.responseText);
 
 
 
@@ -70,40 +68,40 @@ class OIService {
   // Note that username/password are ignored. Anyone can ping openidm
   // This just tests if OpenIDM is up and responding
   Future<HttpResponse> ping() {
-    return _get("/info/ping").then( (resp) {
+    return _get("/info/ping").then((resp) {
       return resp;
     });
   }
 
   // Get the openidm configuration
-  Future<OIConfig> getConfig() => _getJSON("/config").then( (m) => new OIConfig(m));
+  Future<OIConfig> getConfig() => _getJSON("/config").then((m) => new OIConfig(m));
 
   // Check the status of the openidm server as well our credentials
   // Note: We dont use ping here because it does not test the credentials.
   // We test by doing a GET on the sync config
   // todo: We should find a less expensive call
   Future<HttpResponse> credentialCheck() {
-      return _get("/config").then( (resp) {
-        return resp;
-      }, onError: (e) {
-        log.severe("Health Check Failed. Cause ${e.status}");
-        return e;
-      } );
-    }
+    return _get("/config").then((resp) {
+      return resp;
+    }, onError: (e) {
+      log.severe("Health Check Failed. Cause ${e.status}");
+      return e;
+    });
+  }
 
+  Future<List> getUsers() => _queryAllIds("/managed/user");
 
-  Future<List> getUsers() {
-    //var t2 = "$_url/managed/user/?_queryId=query-all-ids";
-
-    return _get("/managed/user/?_queryId=query-all-ids").then((val) {
-      //print("response = $val");
-      //var json = JSON.decode(val.responseText);
-      var json = val.responseText; // get converts it for us...
-      var r = json['result'];
-      var ids = [];
-      r.forEach((item) => ids.add(item['_id']));
-      //print("ids = $ids");
-      return ids;
+  // Query for all ids. If [justReturnIds] is true we return an array of just
+  // the object ids (not any additional data that may be passed back)
+  Future<List> _queryAllIds(String queryRoot, {bool justReturnIds: false}) {
+    return _get("$queryRoot?_queryId=query-all-ids").then((val) {
+      var r = val.responseText['result'];
+      if (justReturnIds) {
+        var ids = [];
+        r.forEach((item) => ids.add(item['_id']));
+        return ids;
+      }
+      return r;
     });
   }
 
@@ -115,7 +113,7 @@ class OIService {
 
   Future<List> getUsersWithDetail() {
     return getUsers().then((List ids) {
-      return Future.wait(ids.map((id) => getUserDetail(id))).then((result) => result);
+      return Future.wait(ids.map((x) => getUserDetail(x['_id']))).then((result) => result);
     });
   }
 
@@ -141,7 +139,7 @@ class OIService {
   }
 
 
-  Future queryAvailableWorkflows() => _http.get("$_url/workflow/processdefinition?_queryId=query-all-ids", headers: adminHeaders).then((r) => _queryResult(r));
+  Future queryAvailableWorkflows() => _queryAllIds("workflow/processdefinition?_queryId=query-all-ids");
 
   /**
     * Launch a workflow instance.
@@ -167,32 +165,18 @@ class OIService {
     return _http.request("$_url/workflow/processinstance?_queryId=filtered-query&businessKey=$businessKey", method: "POST", requestHeaders: adminHeaders).then((r) => r.responseText);
   }
 
-  Future queryAllRunningProcessInstances() {
-    return _get("/workflow/processinstance?_queryId=query-all-ids").then((r) => _queryResult(r));
-  }
-
+  Future queryAllRunningProcessInstances() => _queryAllIds("/workflow/processinstance");
 
   // Returns a Future Map with the process status. The attributes in the map are
   // A sample map entry:
   // {_rev: 0, startTime: 2014-02-19T15:18:54.561Z, startUserId: openidm-admin,
   //  _id: 101, businessKey: null, durationInMillis: null, endTime: null,
   // superProcessInstanceId: null, processDefinitionId: contractorOnboarding:1:3, deleteReason: null}
-  Future<Map> getProcessInstanceStatus(String id) {
-    return _get("/workflow/processinstance/$id").then((r) => r.responseText);
-  }
+  Future<Map> getProcessInstanceStatus(String id) => _getJSON("/workflow/processinstance/$id");
+
 
   Future stopProcessInstance(String id) => _http.delete("$_url/workflow/processinstance/$id", headers: adminHeaders).then((r) => r.responseText);
 
-  // extract the query results
-  // get appears to coerce responseText to a map if media type is JSON
-  dynamic _queryResult(HttpResponse response) {
-    if (response.responseText is Map) {
-      return response.responseText["result"];
-    } else {
-      var m = JSON.decode(response.responseText) as Map;
-      return m["result"];
-    }
-  }
 
   Future<List> namedQuery(String query) {
     log.fine("named query = $query");
@@ -207,33 +191,32 @@ class OIService {
     var p = JSON.encode(u);
     log.fine("create $id $p");
     return _http.post("$_url/system/customerdb/account?_action=create", p, headers: adminHeaders).then((r) {
-          log.fine("Result = $r");
+      log.fine("Result = $r");
       return r;
     });
   }
 
   Future createManagedUser(Map u) {
-      var id = u["id"];
-      u['_id'] = id;
-      var p = JSON.encode(u);
-      log.fine("create $id $p");
-      return _http.post("$_url/managed/user?_action=create", p, headers: adminHeaders).then((r) {
-        log.fine("Result = $r");
-        return r;
-      });
-    }
+    var id = u["id"];
+    u['_id'] = id;
+    var p = JSON.encode(u);
+    log.fine("create $id $p");
+    return _http.post("$_url/managed/user?_action=create", p, headers: adminHeaders).then((r) {
+      log.fine("Result = $r");
+      return r;
+    });
+  }
 
   Future createManagedUserCustomEndpoint(Map u) {
-       var id = u["id"];
-       u['_id'] = id;
-       var p = JSON.encode(u);
-       log.fine("create $id $p");
-       return _http.post("$_url/endpoint/createuser", p, headers: adminHeaders).then((r) {
-         log.fine("Result = $r");
-         return r;
-       });
-     }
-
+    var id = u["id"];
+    u['_id'] = id;
+    var p = JSON.encode(u);
+    log.fine("create $id $p");
+    return _http.post("$_url/endpoint/createuser", p, headers: adminHeaders).then((r) {
+      log.fine("Result = $r");
+      return r;
+    });
+  }
 
   Future deleteDBUser(String id) {
     log.fine("delete user $id");
@@ -244,17 +227,18 @@ class OIService {
     });
   }
 
+  // Return a list of sync configuration objects
+  // todo: show example
   Future<List> getSyncConfig() {
-    return _get("/config/sync").then( (r) {
+    return _get("/config/sync").then((r) {
       log.finest("sync config = $r");
-      var  json = r.responseText;
-      return json['mappings'];
+      return r.responseText['mappings'];
     });
   }
 
   // Invoke recon on the given mapping
   Future<HttpResponse> syncStart(String mapping) {
-    return _http.post("$_url/recon?_action=recon&mapping=$mapping", "", headers: adminHeaders ).then( (r) {
+    return _http.post("$_url/recon?_action=recon&mapping=$mapping", "", headers: adminHeaders).then((r) {
       log.finest("Recon result $r");
       return r;
     });
@@ -291,11 +275,21 @@ class OIService {
   }
 
    */
-  Future<Map> getSyncInfo([String id = null]) =>
-      ( id == null? _getJSON("/recon") : _getJSON("/recon/$id") );
+  Future<Map> getSyncInfo([String id = null]) => (id == null ? _getJSON("/recon") : _getJSON("/recon/$id"));
 
   // Cancel an in progress recon operation
   Future<Map> cancelRecon(String id) => _postReturnJSON("/recon/$id&_action=cancel");
-}
 
+  // /system objects
+
+  // get all ids for system.
+  // [system] "ldap" for example
+  // [objType] "account" or "group"
+  Future<List> getSystemObjects(String system, String objType) => _queryAllIds("/system/$system/$objType");
+
+  // get the specified system object.
+  // Example getSystemObject("ldap","account","uid=xxxx....")
+  // [id] is an identifier returned by [getSystemObjects]
+  Future<Map> getSystemObject(String system, String objType, String id) => _getJSON("/system/$system/$objType/$id");
+}
 

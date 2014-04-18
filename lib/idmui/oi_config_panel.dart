@@ -11,6 +11,7 @@ class OIConfigPanel {
   OIService _svc;
   OIConfig config;
   String selectedConnector = "";
+  String objectId = "";
 
   //List<String> get connectorList => config.connectorList;
 
@@ -27,6 +28,18 @@ class OIConfigPanel {
   }
 
   selectConnector() {
+  }
+
+  getSystemIds() {
+    _svc.getSystemObjects(selectedConnector, "account").then((list) {
+      log.finest("Got list $list");
+    });
+  }
+
+  getSystemObject() {
+    _svc.getSystemObject(selectedConnector, "account", objectId).then( (r) {
+      log.finest("Result = $r");
+    });
   }
 
 
